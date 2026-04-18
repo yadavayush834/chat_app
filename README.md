@@ -6,29 +6,29 @@
   <img src="https://img.shields.io/badge/Ethers.js-ECC_Crypto-3C3C3D?style=for-the-badge&logo=ethereum&logoColor=white" />
 </p>
 
-# 🔐 SecureChat
+#  SecureChat
 
 > A real-time, cryptographically secured chat application with client-side key generation, digital signature verification, and zero-trust architecture.
 
 ---
 
-## ✨ Features
+##  Features
 
 | Feature | Description |
 |---|---|
-| **🔑 Client-Side Key Generation** | BIP39 mnemonic phrase generates an ECC keypair entirely in the browser — no secrets ever leave your device |
-| **✍️ Digital Signature Verification** | Every action (register, add friend, send message, upload file) is signed client-side and verified server-side using `ethers.js` |
-| **💬 Real-Time Messaging** | Instant message delivery via Socket.IO with WebSocket transport |
-| **📡 Presence System** | Live online/offline indicators and "last seen" timestamps for all connections |
-| **✅ Read Receipts** | Triple-state delivery tracking: `sent` → `delivered` → `seen` |
-| **⌨️ Typing Indicators** | Real-time "typing…" status with auto-timeout |
-| **📎 File & Image Sharing** | Upload and share images/files (up to 5 MB) with cryptographic upload authorization |
-| **👤 Username System** | Human-readable usernames mapped to cryptographic addresses |
-| **🛡️ Zero-Trust Backend** | The server never stores private keys and verifies every request via signature recovery |
+| ** Client-Side Key Generation** | BIP39 mnemonic phrase generates an ECC keypair entirely in the browser — no secrets ever leave your device |
+| ** Digital Signature Verification** | Every action (register, add friend, send message, upload file) is signed client-side and verified server-side using `ethers.js` |
+| ** Real-Time Messaging** | Instant message delivery via Socket.IO with WebSocket transport |
+| ** Presence System** | Live online/offline indicators and "last seen" timestamps for all connections |
+| ** Read Receipts** | Triple-state delivery tracking: `sent` → `delivered` → `seen` |
+| ** Typing Indicators** | Real-time "typing…" status with auto-timeout |
+| ** File & Image Sharing** | Upload and share images/files (up to 5 MB) with cryptographic upload authorization |
+| ** Username System** | Human-readable usernames mapped to cryptographic addresses |
+| ** Zero-Trust Backend** | The server never stores private keys and verifies every request via signature recovery |
 
 ---
 
-## 🏗️ Architecture
+##  Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -67,7 +67,7 @@
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 
@@ -114,7 +114,7 @@ The client will start on `http://localhost:5173` by default.
 
 ---
 
-## 📂 Project Structure
+##  Project Structure
 
 ```
 chat_app/
@@ -150,7 +150,7 @@ chat_app/
 
 ---
 
-## 🔒 Security Model
+##  Security Model
 
 ### How It Works
 
@@ -218,7 +218,7 @@ chat_app/
 
 ---
 
-## 🤝 Contributing
+##  Contributing
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
