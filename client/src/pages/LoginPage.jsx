@@ -1,86 +1,79 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight, KeyRound } from 'lucide-react';
 import { restoreWallet } from '../utils/crypto';
-
+import { authenticate } from '../lib/api';
+import AuthLayout from '../components/AuthLayout';
 export default function LoginPage() {
-    const [mnemonic, setMnemonic] = useState('');
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
-
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        setError('');
-        
-        if (!mnemonic.trim() || mnemonic.trim().split(' ').length < 12) {
-            setError('Please enter a valid 12-to-24 word recovery phrase');
-            return;
-        }
-
-        setLoading(true);
-        try {
-            // Restore wallet implicitly checks if mnemonic is valid
-            const wallet = restoreWallet(mnemonic);
-            
-            // Check via backend if user exists using their address
-            const res = await fetch('http://localhost:5000/api/users/me', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ address: wallet.address })
-            });
-            const data = await res.json();
-            
-            if (res.ok) {
-                // Save session minimally (store private key so we can recreate wallet without prompting again)
-                localStorage.setItem('privateKey', wallet.privateKey);
-                localStorage.setItem('address', data.address);
-                localStorage.setItem('username', data.username);
-                navigate('/chat');
-            } else {
-                setError(data.error || 'Account not found for this phrase');
-            }
-        } catch (err) {
-            setError('Invalid phrase format or connection error');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return (
-        <div className="app-container">
-            <div className="glass-panel auth-box">
-                <h1 style={{fontSize: '2.5rem', marginBottom: '2rem'}}>Access Account</h1>
-                
-                {error && <div style={{color: '#ff4c4c', marginBottom: '1rem', background: 'rgba(255,0,0,0.1)', padding: '0.5rem', borderRadius: '4px'}}>{error}</div>}
-                
-                <form onSubmit={handleLogin}>
-                    <textarea 
-                        className="input-field" 
-                        placeholder="Enter your 12-word recovery phrase..." 
-                        value={mnemonic}
-                        onChange={(e) => setMnemonic(e.target.value)}
-                        style={{minHeight: '100px', resize: 'vertical'}}
-                    />
-                    
-                    <button 
-                        type="submit" 
-                        className="btn btn-primary" 
-                        style={{width: '100%', marginTop: '1rem'}}
-                        disabled={loading}
-                    >
-                        {loading ? 'Authenticating...' : 'Enter Chat'}
-                    </button>
-                    
-                    <button 
-                        type="button" 
-                        className="btn" 
-                        style={{width: '100%', marginTop: '1rem', border: 'none'}}
-                        onClick={() => navigate('/')}
-                    >
-                        Back to Register
-                    </button>
-                </form>
-            </div>
+  const [phrase, setPhrase] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  async function submit(event) {
+    event.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      let wallet;
+      try {
+        wallet = restoreWallet(phrase.toLowerCase().trim().replace(/\s+/g, ' '));
+      } catch {
+        throw new Error('That recovery phrase isn’t valid. Check each word and try again.');
+      }
+      await authenticate(wallet, 'login');
+      setPhrase('');
+      navigate('/chat');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+  return (
+    <AuthLayout>
+      <section className="auth-form">
+        <div className="section-kicker">PICK UP WHERE YOU LEFT OFF</div>
+        <h2>Hey, welcome back.</h2>
+        <p className="auth-description">Your conversations are right where you left them.</p>
+        <div className="auth-tabs">
+          <Link to="/">Create account</Link>
+          <span className="selected">
+            Sign in <ArrowRight size={14} />
+          </span>
         </div>
-    );
+        <form onSubmit={submit}>
+          <label htmlFor="phrase">Your recovery phrase</label>
+          <textarea
+            className="phrase-input"
+            id="phrase"
+            value={phrase}
+            onChange={(e) => setPhrase(e.target.value)}
+            placeholder="Enter your 12-word recovery phrase"
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
+            required
+            rows={4}
+          />
+          <small className="field-hint">The words you saved when creating your account.</small>
+          {error && (
+            <p className="error-banner" role="alert">
+              {error}
+            </p>
+          )}
+          <button className="primary-button auth-submit" disabled={loading}>
+            {loading ? 'Opening your conversations…' : 'Back to your conversations'}
+            <ArrowRight size={18} />
+          </button>
+        </form>
+        <div className="auth-note">
+          <KeyRound size={17} />
+          <p>Your phrase stays in your browser. We verify your signature to open your account.</p>
+        </div>
+        <p className="honest-note">
+          Lost your phrase? We can’t recover it. You can <Link to="/">create a new account</Link>.
+        </p>
+      </section>
+    </AuthLayout>
+  );
 }

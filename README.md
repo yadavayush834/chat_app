@@ -1,239 +1,63 @@
-<p align="center">
-  <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=white" />
-  <img src="https://img.shields.io/badge/Node.js-Express-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" />
-  <img src="https://img.shields.io/badge/Socket.IO-4-010101?style=for-the-badge&logo=socketdotio&logoColor=white" />
-  <img src="https://img.shields.io/badge/MongoDB-Mongoose-47A248?style=for-the-badge&logo=mongodb&logoColor=white" />
-  <img src="https://img.shields.io/badge/Ethers.js-ECC_Crypto-3C3C3D?style=for-the-badge&logo=ethereum&logoColor=white" />
-</p>
+# SecureChat
 
-#  SecureChat
+A little space for your people. A responsive, real-time messenger with a charcoal and warm peach interface, recovery-phrase accounts, and signed messages.
 
-> A real-time, cryptographically secured chat application with client-side key generation, digital signature verification, and zero-trust architecture.
+![SecureChat desktop messenger](docs/screenshots/chat-desktop.png)
 
----
+## Run locally
 
-##  Features
+Requires **Node.js 22.13+** and npm. Node 24 LTS or later is recommended.
 
-| Feature | Description |
-|---|---|
-| ** Client-Side Key Generation** | BIP39 mnemonic phrase generates an ECC keypair entirely in the browser — no secrets ever leave your device |
-| ** Digital Signature Verification** | Every action (register, add friend, send message, upload file) is signed client-side and verified server-side using `ethers.js` |
-| ** Real-Time Messaging** | Instant message delivery via Socket.IO with WebSocket transport |
-| ** Presence System** | Live online/offline indicators and "last seen" timestamps for all connections |
-| ** Read Receipts** | Triple-state delivery tracking: `sent` → `delivered` → `seen` |
-| ** Typing Indicators** | Real-time "typing…" status with auto-timeout |
-| ** File & Image Sharing** | Upload and share images/files (up to 5 MB) with cryptographic upload authorization |
-| ** Username System** | Human-readable usernames mapped to cryptographic addresses |
-| ** Zero-Trust Backend** | The server never stores private keys and verifies every request via signature recovery |
-
----
-
-##  Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        CLIENT (React + Vite)                │
-│                                                             │
-│  ┌──────────┐  ┌───────────┐  ┌───────────┐  ┌──────────┐  │
-│  │ Landing  │  │   Login   │  │   Chat    │  │  Crypto  │  │
-│  │  Page    │  │   Page    │  │   Page    │  │  Utils   │  │
-│  └──────────┘  └───────────┘  └───────────┘  └──────────┘  │
-│       │              │              │              │         │
-│       └──────────────┴──────────────┴──────────────┘         │
-│                          │                                   │
-│                   ethers.js Wallet                           │
-│              (BIP39 · ECC · Signatures)                     │
-└──────────────────────────┬──────────────────────────────────┘
-                           │  HTTP REST + WebSocket (Socket.IO)
-┌──────────────────────────┴──────────────────────────────────┐
-│                     SERVER (Node.js + Express)              │
-│                                                             │
-│  ┌─────────────┐  ┌───────────────┐  ┌──────────────────┐  │
-│  │  REST API   │  │  Socket.IO    │  │  Multer Upload   │  │
-│  │  Routes     │  │  Events       │  │  Pipeline        │  │
-│  └──────┬──────┘  └───────┬───────┘  └────────┬─────────┘  │
-│         │                 │                    │             │
-│         └─────────────────┴────────────────────┘             │
-│                           │                                  │
-│                  ethers.verifyMessage()                      │
-│              (Signature Recovery on ALL ops)                 │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-                    ┌──────┴──────┐
-                    │   MongoDB   │
-                    │   Atlas     │
-                    └─────────────┘
-```
-
----
-
-##  Getting Started
-
-### Prerequisites
-
-- **Node.js** ≥ 18
-- **npm** ≥ 9
-- A **MongoDB** instance (local or [MongoDB Atlas](https://www.mongodb.com/atlas))
-
-### 1. Clone the Repository
-
-```bash
+```sh
 git clone https://github.com/yadavayush834/chat_app.git
 cd chat_app
-```
-
-### 2. Setup the Backend
-
-```bash
-cd backend
-npm install
-```
-
-Create a `.env` file in the **`backend/`** directory:
-
-```env
-MONGO_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/<dbname>
-PORT=5000
-```
-
-Start the server:
-
-```bash
-node server.js
-```
-
-### 3. Setup the Client
-
-```bash
-cd ../client
 npm install
 npm run dev
 ```
 
-The client will start on `http://localhost:5173` by default.
+Open **http://localhost:5173**. SQLite and private upload storage are created automatically in `backend/data/`; no database account or API keys are needed. Fonts and assets are served locally.
 
----
+For a production build on your laptop:
 
-##  Project Structure
-
-```
-chat_app/
-├── backend/
-│   ├── models/
-│   │   ├── User.js          # User schema (username, address, friends, presence)
-│   │   └── Message.js        # Message schema (sender, receiver, content, media, status)
-│   ├── uploads/              # Multer file storage directory
-│   ├── db.js                 # MongoDB connection handler
-│   ├── server.js             # Express server, REST API, Socket.IO events
-│   ├── package.json
-│   └── .env                  # Environment variables (MONGO_URI)
-│
-├── client/
-│   ├── src/
-│   │   ├── pages/
-│   │   │   ├── LandingPage.jsx   # Registration + wallet generation
-│   │   │   ├── LoginPage.jsx     # Mnemonic-based login
-│   │   │   └── ChatPage.jsx      # Main chat interface
-│   │   ├── utils/
-│   │   │   └── crypto.js         # Wallet generation, restoration, signing
-│   │   ├── App.jsx               # React Router setup
-│   │   ├── App.css               # Component styles
-│   │   ├── index.css             # Global styles & design system
-│   │   └── main.jsx              # Entry point
-│   ├── index.html
-│   ├── vite.config.js
-│   └── package.json
-│
-├── .gitignore
-└── README.md
+```sh
+npm run build
+npm start
 ```
 
----
+Open **http://localhost:5000**. Run `./scripts/install-desktop.sh` on Linux to add **SecureChat** to your application launcher.
 
-##  Security Model
+Express serves both the app and API. The default bind address is loopback; set `HOST=0.0.0.0` to expose it on your network. For hosting, use HTTPS, set `SECURE_COOKIE=true` and `CLIENT_ORIGIN` to the actual browser origin, and preserve the writable data directory. Configure optional settings using [backend/.env.example](backend/.env.example).
 
-### How It Works
+## What works
 
-1. **Registration** — User picks a username. A BIP39 mnemonic phrase and ECC keypair are generated **client-side**. The registration request is signed and the server verifies ownership via `ethers.verifyMessage()`.
+- Create an account, back up its 12-word phrase, and sign in again on another device.
+- Add people by username; both participants get the conversation instantly.
+- Real-time direct messages, typing, presence, unread counts, and sent/delivered/seen receipts.
+- Signed, idempotent message sends with visible failure and retry states.
+- Images and downloadable files up to 5 MB, accessible to the two participants.
+- Conversation search, search within loaded history, emoji, multiline drafts, and paginated older messages.
+- Reconnection without duplicate messages, tab-aware presence, and phone navigation.
 
-2. **Login** — User enters their 12-word mnemonic phrase. The wallet is reconstructed in-browser and the derived address is checked against the database.
+[Phone layout](docs/screenshots/chat-mobile.png) · [Account creation screen](docs/screenshots/welcome.png)
 
-3. **Messaging** — Every outgoing message is signed with the sender's private key. The server recovers the signer's address and rejects any message where the recovered address doesn't match the claimed sender.
+## Account and privacy model
 
-4. **Friend Requests** — Adding a friend requires a signed payload to prevent impersonation.
+The browser generates and restores the signing wallet. A single-use, two-minute challenge proves account ownership; an HTTP-only, SameSite session authenticates HTTP requests and sockets. Every message signs its content, recipient, attachment ID, and unique client ID. Only the recipient can update read receipts. History and files require participant authorization.
 
-5. **File Uploads** — Each upload includes a timestamped signature. Expired or invalid signatures cause the uploaded file to be immediately deleted.
+**This is not end-to-end encrypted.** The server stores readable messages and files. Private keys stay in browser session storage for the current tab; the recovery phrase is never sent to the server. Closing the tab requires the phrase to sign in again. Sign out revokes that session and its sockets. Keep the recovery phrase private; it cannot be reset.
 
-6. **Socket Authentication** — WebSocket connections are authenticated with a timestamped signature (5-minute expiry window) to prevent replay attacks.
+This repair replaces the original MongoDB-only prototype with SQLite. It does not import an existing MongoDB database. Existing externally hosted data should be backed up before migrating.
 
-### What the Server Never Sees
+## Development
 
-| Data | Stored? |
-|---|---|
-| Private keys | ❌ Never |
-| Mnemonic phrases | ❌ Never |
-| Raw passwords | ❌ N/A (passwordless) |
-| Public addresses | ✅ As user identifier |
-| Message content | ✅ Stored in DB |
+```sh
+npm test                 # 15 backend integration tests; isolated temporary database
+npm run lint
+npm run build
+npx playwright install chromium  # first browser-test run only
+npm run test:e2e          # two-account browser flows, mobile, attachments and recovery
+```
 
----
+Backend tests cover signatures, replay protection, authorization, files, pagination, presence, logout, and persistence through restart. Browser tests use independent sessions and real HTTP/Socket.IO traffic; their data is temporary. Screenshots use test accounts, not personal messages.
 
-## 📡 API Reference
-
-### REST Endpoints
-
-| Method | Endpoint | Description | Auth |
-|---|---|---|---|
-| `POST` | `/api/users/register` | Register a new username + address | Signature |
-| `POST` | `/api/users/me` | Fetch user profile & friends list | Address |
-| `POST` | `/api/users/friend` | Add a friend by username | Signature |
-| `GET` | `/api/messages/:addr/:friendAddr` | Get message history between two users | — |
-| `POST` | `/api/upload` | Upload a file attachment | Signature + Timestamp |
-
-### Socket.IO Events
-
-| Event | Direction | Description |
-|---|---|---|
-| `authenticate` | Client → Server | Authenticate socket connection with signed timestamp |
-| `send_message` | Client → Server | Send a signed message |
-| `receive_message` | Server → Client | Deliver incoming message |
-| `message_sent` | Server → Client | Confirm message was saved |
-| `typing` / `stop_typing` | Bidirectional | Typing indicator events |
-| `update_message_status` | Client → Server | Mark messages as delivered/seen |
-| `message_status_updated` | Server → Client | Notify sender of read receipts |
-| `presence_update` | Server → Client | Online/offline status changes |
-
----
-
-## 🛠️ Tech Stack
-
-| Layer | Technology |
-|---|---|
-| **Frontend** | React 19, Vite 8, React Router 7 |
-| **Backend** | Node.js, Express 5 |
-| **Real-Time** | Socket.IO 4 |
-| **Database** | MongoDB (Mongoose 9) |
-| **Cryptography** | ethers.js 6 (ECC / BIP39 / ECDSA) |
-| **File Uploads** | Multer 2 |
-
----
-
-##  Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
-
-## 📄 License
-
-This project is licensed under the [ISC License](https://opensource.org/licenses/ISC).
-
----
-
-<p align="center">
-  Built with ❤️ using React, Node.js, and ethers.js
-</p>
+**Stack:** React 19, Vite, Express 5, Socket.IO, ethers, and Node’s SQLite module. [Development notes](AGENTS.md) · [ISC license](LICENSE)
